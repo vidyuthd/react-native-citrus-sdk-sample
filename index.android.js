@@ -23,6 +23,7 @@ class citrus_sdk_sample extends Component {
         userLoggedIn : false,
         signInProcess : 'tostart',
         otp : '',
+        balance : 0,
     }
   }
 
@@ -59,7 +60,7 @@ class citrus_sdk_sample extends Component {
       <View style={styles.container}>
         <Text
          style={styles.instructions}>
-          User is signed in
+          User is signed in, balance is {this.state.balance}
          </Text>
       </View>
     );
@@ -68,12 +69,21 @@ class citrus_sdk_sample extends Component {
   signInUser(){
     CitrusSDK.signInUser(this.state.otp,function(data){
         console.warn(data)
+        this.getBalance()
+    }.bind(this),function(error){
+        console.warn(error)
+    })
+  }
+
+  getBalance(){
+    CitrusSDK.getBalance(function(data){
         this.setState({
-                                     signInProcess : 'complete',
-                                     userLoggedIn : true,
-                                });
-    }.bind(this),function(data){
-        console.warn(data)
+            balance: data,
+            signInProcess : 'complete',
+            userLoggedIn : true,
+        })
+    }.bind(this),function(error){
+        console.log(error)
     })
   }
 
@@ -97,8 +107,12 @@ class citrus_sdk_sample extends Component {
                     console.warn(data);
                 })
             }
-        }.bind(this),function(data){
-            console.warn("error in linking user : ",data);
+            else{
+                console.warn('user is signed in ')
+                 this.getBalance();
+            }
+        }.bind(this),function(error){
+            console.warn("error in linking user : ",error)
         })
   }
 }

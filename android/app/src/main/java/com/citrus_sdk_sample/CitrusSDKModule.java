@@ -25,6 +25,7 @@ import com.citrus.sdk.response.PaymentResponse;
 import com.citrus.sdk.classes.LinkUserExtendedResponse;
 import com.citrus.sdk.classes.LinkUserSignInType;
 import com.citrus.sdk.classes.LinkUserPasswordType;
+import com.citrus.sdk.classes.Amount;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -117,6 +118,21 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
                 break;
             case None : success.invoke("signed in "); break;
         }
+    }
+
+    @ReactMethod
+    public void getBalance(final Callback success,final Callback failure){
+        citrusClient.getBalance(new com.citrus.sdk.Callback<Amount>() {
+            @Override
+            public void success(Amount amount) {
+                success.invoke(amount.getValue());
+            }
+
+            @Override
+            public void error(CitrusError error) {
+                failure.invoke(error.getMessage());
+            }
+        });
     }
 
 }
