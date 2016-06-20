@@ -67,8 +67,23 @@ class citrus_sdk_sample extends Component {
          >
          <Text> Add Money To Wallet- adds 5 Rs </Text>
          </TouchableHighlight>
+          <TouchableHighlight
+          onPress = {() => this.payUsingWallet()}
+          >
+          <Text> Pay Using Wallet - pay 5 Rs </Text>
+          </TouchableHighlight>
       </View>
     );
+  }
+
+  payUsingWallet(){
+    CitrusSDK.payUsingWallet(function(data){
+                                     this.setState({
+                                         balance : data,
+                                     })
+                                 }.bind(this),function(error){
+                                                      console.warn("error is ",error);
+                                                  })
   }
 
   addMoneyToWallet(){
@@ -106,7 +121,7 @@ class citrus_sdk_sample extends Component {
      CitrusSDK.isUserSignedIn(function(isUserSignedIn){
             if(!isUserSignedIn){
                 console.warn('user is not signed in ')
-                CitrusSDK.linkUserExtended(null, function(data){
+                CitrusSDK.linkUserExtended('9164478258', function(data){
                     if(data === 'SignInTypeMOtp'){
                         this.setState({
                              signInProcess : 'showMOtp'

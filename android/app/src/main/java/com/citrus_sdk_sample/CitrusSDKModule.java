@@ -79,9 +79,10 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
         });
     }
 
+    // replace args with ReadableMap args
     @ReactMethod
-    public void linkUserExtended(ReadableMap args,final Callback success, final Callback failure){
-        citrusClient.linkUserExtended("", "9164478258", new com.citrus.sdk.Callback<LinkUserExtendedResponse>(){
+    public void linkUserExtended(String mobile,final Callback success, final Callback failure){
+        citrusClient.linkUserExtended("", mobile, new com.citrus.sdk.Callback<LinkUserExtendedResponse>(){
             @Override
             public void success(LinkUserExtendedResponse linkUserExtendedResponse) {
                 // User Linked!
@@ -163,6 +164,25 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
         }
         catch (Exception paymentTypeEx){
             failure.invoke(paymentTypeEx.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void payUsingWallet(final Callback success, final Callback failure){
+        try {
+            citrusClient.prepaidPay(new PaymentType.CitrusCash(new Amount("5"),"https://abc.com"),new com.citrus.sdk.Callback<PaymentResponse>() {
+                @Override
+                public void success(PaymentResponse paymentResponse) {
+                    success.invoke(paymentResponse.getBalanceAmount());
+                }
+
+                @Override
+                public void error(CitrusError citrusError) {
+                    failure.invoke(citrusError.getMessage());
+                }
+            });
+        } catch (CitrusException e) {
+            failure.invoke(e.getMessage());
         }
     }
 }
