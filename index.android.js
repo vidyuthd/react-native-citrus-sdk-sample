@@ -62,8 +62,23 @@ class citrus_sdk_sample extends Component {
          style={styles.instructions}>
           User is signed in, balance is {this.state.balance}
          </Text>
+         <TouchableHighlight
+         onPress = {() => this.addMoneyToWallet()}
+         >
+         <Text> Add Money To Wallet- adds 5 Rs </Text>
+         </TouchableHighlight>
       </View>
     );
+  }
+
+  addMoneyToWallet(){
+    CitrusSDK.addMoneyToWallet('5',function(data){
+        this.setState({
+            balance : data,
+        })
+    }.bind(this),function(error){
+        console.warn(error);
+    })
   }
 
   signInUser(){

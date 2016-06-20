@@ -15,17 +15,19 @@ import com.facebook.react.bridge.Callback;
 import com.citrus.sdk.CitrusClient;
 import com.citrus.sdk.TransactionResponse;
 import com.citrus.sdk.classes.Amount;
+import com.citrus.sdk.classes.Year;
+import com.citrus.sdk.classes.Month;
 import com.citrus.sdk.classes.CashoutInfo;
 import com.citrus.sdk.classes.CitrusConfig;
 import com.citrus.sdk.classes.CitrusException;
 import com.citrus.sdk.payment.PaymentType;
+import com.citrus.sdk.payment.CreditCardOption;
 import com.citrus.sdk.response.CitrusError;
 import com.citrus.sdk.response.CitrusResponse;
 import com.citrus.sdk.response.PaymentResponse;
 import com.citrus.sdk.classes.LinkUserExtendedResponse;
 import com.citrus.sdk.classes.LinkUserSignInType;
 import com.citrus.sdk.classes.LinkUserPasswordType;
-import com.citrus.sdk.classes.Amount;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -135,4 +137,32 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
+    public void addMoneyToWallet(String amt, final Callback success, final Callback failure){
+        // No need to call init on CitrusClient if already done.
+        CreditCardOption creditCardOption = new CreditCardOption("nikhil", "4111111111111111", "234", Month.getMonth("11"), Year.getYear("16"));
+
+        Amount amount = new Amount("5");
+
+        try {
+            // Init Load Money PaymentType
+            PaymentType.LoadMoney loadMoney = new PaymentType.LoadMoney(amount, "https://abc.com", creditCardOption);
+
+            citrusClient.loadMoney(loadMoney, new com.citrus.sdk.Callback<TransactionResponse>() {
+
+                @Override
+                public void success(TransactionResponse transactionResponse) {
+                    success.invoke(transactionResponse.getBalanceAmount());
+                }
+
+                @Override
+                public void error(CitrusError error) {
+                    failure.invoke(error.getMessage());
+                }
+            });
+        }
+        catch (Exception paymentTypeEx){
+            failure.invoke(paymentTypeEx.getMessage());
+        }
+    }
 }
