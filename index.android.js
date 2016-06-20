@@ -72,12 +72,29 @@ class citrus_sdk_sample extends Component {
           >
           <Text> Pay Using Wallet - pay 5 Rs </Text>
           </TouchableHighlight>
+          <TouchableHighlight
+          onPress = {() => this.payUsingCCFromWallet()}
+          >
+          <Text> Pay Using Credit Card from wallet - pay 5 Rs </Text>
+          </TouchableHighlight>
       </View>
     );
   }
 
+  payUsingCCFromWallet(){
+    CitrusSDK.payUsingCCFromWallet(function(data){
+                                    console.warn('success response is ',data);
+                                     this.setState({
+                                         balance : data,
+                                     })
+                                 }.bind(this),function(error){
+                                                      console.warn("error is ",error);
+                                                  })
+  }
+
   payUsingWallet(){
     CitrusSDK.payUsingWallet(function(data){
+                                    console.warn('success response is ',data);
                                      this.setState({
                                          balance : data,
                                      })

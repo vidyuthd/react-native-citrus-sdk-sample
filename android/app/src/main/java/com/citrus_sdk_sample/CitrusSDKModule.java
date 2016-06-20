@@ -1,7 +1,9 @@
 package com.citrus_sdk_sample;
 
 import android.content.Context;
+import android.telecom.Call;
 
+import com.citrus.sdk.CitrusUser;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -37,6 +39,7 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
     private CitrusConfig citrusConfig = null;
     private Context mContext = null;
     private LinkUserExtendedResponse mlinkUserExtendedResponse = null;
+    String BILL_URL = "https://salty-plateau-1529.herokuapp.com/billGenerator.sandbox.php";
 
     public CitrusSDKModule(ReactApplicationContext reactContext){
         super(reactContext);
@@ -147,7 +150,7 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
 
         try {
             // Init Load Money PaymentType
-            PaymentType.LoadMoney loadMoney = new PaymentType.LoadMoney(amount, "https://abc.com", creditCardOption);
+            PaymentType.LoadMoney loadMoney = new PaymentType.LoadMoney(amount, BILL_URL, creditCardOption);
 
             citrusClient.loadMoney(loadMoney, new com.citrus.sdk.Callback<TransactionResponse>() {
 
@@ -170,10 +173,10 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void payUsingWallet(final Callback success, final Callback failure){
         try {
-            citrusClient.prepaidPay(new PaymentType.CitrusCash(new Amount("5"),"https://abc.com"),new com.citrus.sdk.Callback<PaymentResponse>() {
+            citrusClient.payUsingCitrusCash(new PaymentType.CitrusCash(new Amount("5"),BILL_URL),new com.citrus.sdk.Callback<TransactionResponse>() {
                 @Override
-                public void success(PaymentResponse paymentResponse) {
-                    success.invoke(paymentResponse.getBalanceAmount());
+                public void success(TransactionResponse transactionResponse) {
+                    success.invoke(transactionResponse.getBalanceAmount());
                 }
 
                 @Override
@@ -181,8 +184,48 @@ public class CitrusSDKModule extends ReactContextBaseJavaModule {
                     failure.invoke(citrusError.getMessage());
                 }
             });
-        } catch (CitrusException e) {
-            failure.invoke(e.getMessage());
         }
+        catch (CitrusException payUsingCitrusCashEx) {
+            failure.invoke(payUsingCitrusCashEx.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void payUsingCCFromWallet(final Callback success, final Callback failure){
+        final CreditCardOption creditCardOption = new CreditCardOption("nikhil", "4111111111111111", "234", Month.getMonth("11"), Year.getYear("16"));
+
+        citrusClient.getProfileInfo(new com.citrus.sdk.Callback<CitrusUser>(){
+
+            @Override
+            public void success(CitrusUser citrusUser) {
+                try {
+
+                    Amount amount = new Amount("5");
+                    // Init PaymentType
+                    PaymentType.PGPayment pgPayment = new PaymentType.PGPayment(amount, BILL_URL, creditCardOption, citrusUser);
+
+                    citrusClient.pgPayment(pgPayment, new com.citrus.sdk.Callback<TransactionResponse>() {
+
+                        @Override
+                        public void success(TransactionResponse transactionResponse) {
+                            success.invoke(transactionResponse.getBalanceAmount());
+                        }
+
+                        @Override
+                        public void error(CitrusError error) {
+                            failure.invoke(error.getMessage());
+                        }
+                    });
+                }
+                catch (CitrusException payUsingCitrusCashEx) {
+                    failure.invoke(payUsingCitrusCashEx.getMessage());
+                }
+            }
+
+            @Override
+            public void error(CitrusError citrusError) {
+                failure.invoke(citrusError.getMessage());
+            }
+        });
     }
 }
